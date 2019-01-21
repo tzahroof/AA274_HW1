@@ -17,11 +17,23 @@ def ode_fun(tau, z):
     '''
     ########## Code starts here ##########
 
+    x = z[0];
+    y = z[1];
+    theta = z[2];
+    p1 = z[3];
+    p2 = z[4];
+    p3 = z[5];
+    r = z[6];
 
+    V = -(p1*np.cos(theta) + p2*np.sin(theta))/2;
+    w = -p3/2;
 
-
-
-
+    dz = np.array([r*V*cos(theta), 
+        r*V*sin,
+        r*w,
+        0,
+        0,
+        r*(p1*V*sin(theta) - p2*V*cos(theta))]);
 
     ########## Code ends here ##########
     return dz
@@ -47,7 +59,8 @@ def bc_fun(za, zb):
 
     ########## Code starts here ##########
 
-
+    bca = np.array([za[0], za[1], za[2]+np.pi/2]);
+    bcb = np.array([zb[0]-5, zb[1]-5, zb[2]+pi/2]);
 
 
     ########## Code ends here ##########
@@ -89,7 +102,17 @@ def compute_controls(z):
     '''
     ########## Code starts here ##########
 
+    #TODO: note that time is rows, z state is in columns
+    theta = z[:,2]
+    p1 = z[:,3]
+    p2 = z[:,4]
+    p3 = z[:,5]
 
+    V = -(p1*np.cos(theta) + p2*np.sin(theta))/2;
+    # V = -(np.multiply(p1 , np.cos(theta)) + np.multiply(p2 , np.sin(theta)) )/2
+
+    #om = -p3/2
+    om = -p3/2;
     ########## Code ends here ##########
 
     return V, om
@@ -99,7 +122,7 @@ def main():
     This function solves the specified bvp problem and returns the corresponding optimal contol sequence
     Outputs:
         V: optimal V control sequence 
-        om: optimal om ccontrol sequence
+        om: optimal om control sequence
     You are required to define the problem inputs, initial guess, and compute the controls
 
     HINT: The total time is between 15-25
@@ -107,7 +130,7 @@ def main():
     ########## Code starts here ##########
 
 
-
+    initial_guess = (1.0, 0.0, 0.0)
 
 
 

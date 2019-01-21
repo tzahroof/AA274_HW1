@@ -44,7 +44,37 @@ def differential_flatness_trajectory():
     '''
     ########## Code starts here ##########
 
+    A = np.array([[1, 0, 0 , 0],
+        [0, 1, 0 , 0],
+        [1, tf, tf**2, tf**3],
+        [0, 1, 2*tf, 3*(tf**2)]])
 
+    bx = np.array([x_0, V_0*np.cos(th_0), x_f, V_f*np.cos(th_f)]);
+    by = np.array([y_0, V_0*np.sin(th_0), y_f, V_f*np.sin(th_f)]);
+    x_sol = np.linalg(A, bx)
+    y_sol = np.linalg(A, by)
+
+    x_traj = x_sol[0] + x_sol[1]*t + x_sol[2]*t**2 + x_sol[3]*t**3;
+    y_traj = y_sol[0] + y_sol[1]*t + y_sol[2]*t**2 + y_sol[3]*t**3;
+
+    xd_traj = x_sol[1] + 2*x_sol[2] * t + 3 * x_sol[3]*t**2;
+    yd_traj = y_sol[1] + 2*y_sol[2] * t + 3 * y_sol[3]*t**2;
+
+    xdd_traj = 2*x_sol[2] + 6*x_sol[3]*t;
+    ydd_traj = 2*y_sol[2] + 6*y_sol[3]*t;
+
+    theta_traj = np.arctan2(yd_traj/xd_traj);
+
+    traj = np.concatenate((np.vstack(x_traj),
+            np.vstack(y_traj),
+            np.vstack(theta_traj),
+            np.vstack(xd_traj),
+            np.vstack(yd_traj),
+            np.vstack(xdd_traj),
+            np.vstack(ydd_traj)), axis=1);
+
+
+    #TODO: Write V, w by solving linear equations of xdd = [2x2 matrix] *[a w]
 
     ########## Code ends here ##########
     return traj, V, om
@@ -61,6 +91,9 @@ def compute_arc_length(V, t):
     HINT: This should take one line
     '''
     ########## Code starts here ##########
+
+    V = 
+
 
     ########## Code ends here ##########
     return s
