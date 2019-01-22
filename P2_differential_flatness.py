@@ -44,6 +44,8 @@ def differential_flatness_trajectory():
     '''
     ########## Code starts here ##########
 
+    # Solve for xi coefficients
+
     A = np.array([[1, 0, 0 , 0],
         [0, 1, 0 , 0],
         [1, tf, tf**2, tf**3],
@@ -51,8 +53,10 @@ def differential_flatness_trajectory():
 
     bx = np.array([x_0, V_0*np.cos(th_0), x_f, V_f*np.cos(th_f)]);
     by = np.array([y_0, V_0*np.sin(th_0), y_f, V_f*np.sin(th_f)]);
-    x_sol = np.linalg(A, bx)
-    y_sol = np.linalg(A, by)
+    x_sol = np.linalg.solve(A, bx)
+    y_sol = np.linalg.solve(A, by)
+
+    # Determine traj
 
     x_traj = x_sol[0] + x_sol[1]*t + x_sol[2]*t**2 + x_sol[3]*t**3;
     y_traj = y_sol[0] + y_sol[1]*t + y_sol[2]*t**2 + y_sol[3]*t**3;
@@ -63,7 +67,7 @@ def differential_flatness_trajectory():
     xdd_traj = 2*x_sol[2] + 6*x_sol[3]*t;
     ydd_traj = 2*y_sol[2] + 6*y_sol[3]*t;
 
-    theta_traj = np.arctan2(yd_traj/xd_traj);
+    theta_traj = np.arctan2(yd_traj,xd_traj);
 
     traj = np.concatenate((np.vstack(x_traj),
             np.vstack(y_traj),
@@ -73,8 +77,17 @@ def differential_flatness_trajectory():
             np.vstack(xdd_traj),
             np.vstack(ydd_traj)), axis=1);
 
+    # Determine control inputs from states
 
-    #TODO: Write V, w by solving linear equations of xdd = [2x2 matrix] *[a w]
+    V = np.zeros(t.shape[0])
+    om = np.zeros(t.shape[0])
+
+    V[0] = V_0
+    om[0] = 0
+
+    for i in range(1,t.shape[0]):
+        V[i] = np.sqrt(xd_traj[i]**2 + yd_traj[i]**2)
+        om[i] = (theta_traj[i] - theta_traj[i-1])/dt
 
     ########## Code ends here ##########
     return traj, V, om
@@ -92,8 +105,7 @@ def compute_arc_length(V, t):
     '''
     ########## Code starts here ##########
 
-    V = 
-
+    s = cumtrapz(V, t, initial=0)
 
     ########## Code ends here ##########
     return s
@@ -106,12 +118,22 @@ def rescale_V(V, om):
         om:  vector of angular velocities of length T. Solution from the unconstrained, differential flatness problem.
     Output:
         V_tilde: Rescaled velocity that satisfies the control constraints.
-    HINT: at each timestep V_tilde should be computed as a minimum of the original value V, and values required to ensure _both_ constraints are satisfied
+
+    HINT: at each timestep V_tilde should be computed as a minimum of the original value V, 
+        and values required to ensure _both_ constraints are satisfied
+
     HINT: This should take one line
     '''
     ########## Code starts here ##########
+    V_tilde = np.copy(V)
+
+    for i in range(V.shape[0]):
+        V_tilde[i] = min(V_max, V[i])
+        if(om[i] != 0):
+            V_tilde[i] = min(V_tilde[i], abs(V[i]/om[i]))
 
     ########## Code ends here ##########
+
     return V_tilde
 
 
@@ -128,6 +150,8 @@ def compute_tau(V_tilde, s):
     '''
     ########## Code starts here ##########
 
+    tau = cumtrapz(1/V_tilde, s, initial=0)
+
     ########## Code ends here ##########
     return tau
 
@@ -143,6 +167,9 @@ def rescale_om(V, om, V_tilde):
     HINT: This should take one line.
     '''
     ########## Code starts here ##########
+
+
+    om_tilde = V_tilde/V * om
 
     ########## Code ends here ##########
     return om_tilde
