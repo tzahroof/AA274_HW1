@@ -28,12 +28,13 @@ def ode_fun(tau, z):
     V = -(p1*np.cos(theta) + p2*np.sin(theta))/2;
     w = -p3/2;
 
-    dz = np.array([r*V*cos(theta), 
-        r*V*sin,
+    dz = np.array([r*V*np.cos(theta), 
+        r*V*np.sin(theta),
         r*w,
         0,
         0,
-        r*(p1*V*sin(theta) - p2*V*cos(theta))]);
+        r*(p1*V*np.sin(theta) - p2*V*np.cos(theta)),#possible error
+        0]);
 
     ########## Code ends here ##########
     return dz
@@ -59,8 +60,23 @@ def bc_fun(za, zb):
 
     ########## Code starts here ##########
 
-    bca = np.array([za[0], za[1], za[2]+np.pi/2]);
-    bcb = np.array([zb[0]-5, zb[1]-5, zb[2]+pi/2]);
+    lambda_var = 2.0 #Adjust this
+
+    theta = zb[2]
+    p1 = zb[3]
+    p2 = zb[4]
+    p3 = zb[5]
+
+
+    V = -(p1*np.cos(theta) + p2*np.sin(theta))/2;
+    w = -p3/2
+
+    #TODO: check if this H is correct
+    H = lambda_var + V**2 + w**2 + p1*V*np.cos(theta) +p2*V*np.sin(theta) + p3*w
+
+
+    bca = np.array([za[0]-x0[0], za[1]-x0[1], za[2]-x0[2]]);
+    bcb = np.array([zb[0]-xf[0], zb[1]-xf[1], zb[2]-xf[2], H]);
 
 
     ########## Code ends here ##########
@@ -130,8 +146,13 @@ def main():
     ########## Code starts here ##########
 
 
-    initial_guess = (1.0, 0.0, 0.0)
-
+    initial_guess = (2.0,2.0, -np.pi/2.0, -2, -2, 0.5, 20)
+    num_ODE = 7;
+    num_parameters = 0;
+    num_left_boundary_conditions = 3;
+    boundary_points = (0,1)
+    function = ode_fun
+    boundary_conditions = bc_fun
 
 
 
