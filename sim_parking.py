@@ -23,15 +23,24 @@ t_end = 20
 
 if args.parking == "forward":
     ########## Code starts here ##########
-
+    x_0 = 5
+    y_0 = 6
+    th_0 = -np.pi/2
+    t_end = 20
     ########## Code ends here ##########
 elif args.parking == "reverse":
     ########## Code starts here ##########
-
+    x_0 = 5
+    y_0 = 4
+    th_0 = -np.pi/2
+    t_end = 20
     ########## Code ends here ##########
 elif args.parking == "parallel":
     ########## Code starts here ##########
-
+    x_0 = 7
+    y_0 = 5
+    th_0 = -np.pi/2
+    t_end = 20
     ########## Code ends here ##########
 else:
     raise ValueError("parking type not known")

@@ -1,5 +1,6 @@
 import numpy as np
 from utils import wrapToPi
+import math
 
 def ctrl_pose(x, y, th, xg, yg, thg):
     '''
@@ -15,7 +16,22 @@ def ctrl_pose(x, y, th, xg, yg, thg):
 
     ########## Code starts here ##########
 
+    rho = np.sqrt((xg-x) ** 2 + (yg-y) ** 2)
+    alpha = wrapToPi(np.arctan2(yg-y,xg-x)-(th))
+    delta = wrapToPi(alpha + th - thg)
 
+
+    k1 = 0.8
+    k2 = 0.1
+    k3 = 0.5
+
+    V = k1 * rho * np.cos(alpha)
+    om = k2 * alpha + k1 * np.sinc(alpha/np.pi) * np.cos(alpha) * (alpha + k3 * delta)
+
+    V = np.sign(V) * min(abs(V),0.5)
+    om = np.sign(om) * min(abs(om),1)
+
+    ctrl = np.array([V,om])
 
     ########## Code ends here ##########
 
