@@ -28,6 +28,7 @@ def ctrl_pose(x, y, th, xg, yg, thg):
     V = k1 * rho * np.cos(alpha)
     om = k2 * alpha + k1 * np.sinc(alpha/np.pi) * np.cos(alpha) * (alpha + k3 * delta)
 
+    # saturation limits
     V = np.sign(V) * min(abs(V),0.5)
     om = np.sign(om) * min(abs(om),1)
 

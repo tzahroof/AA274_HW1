@@ -26,8 +26,49 @@ def ctrl_traj(x, y, th,
     
     ########## Code starts here ##########
 
+    kpx = 1
+    kpy = 1
+    kdx = 2
+    kdy = 2
+
+    dist_from_goal = np.sqrt((x_g - x)**2 + (y_g - y)**2)
+
+    if (dist_from_goal < 0.5):
+      # switch control laws because we're close to the goal
+      [V, om] = ctrl_pose(x,y,th,x_g,y_g,th_g)
+    else:
+
+      # Set up and solve for a, w
+      V_prev = ctrl_prev[0]
+      w_prev = ctrl_prev[1]
+
+      xdot = V_prev*np.cos(th)
+      ydot = V_prev*np.sin(th)
+
+      u1 = xdd_d + kpx *(x_d - x) + kdx * (xd_d - xdot)
+      u2 = ydd_d + kpy *(y_d - y) + kdy * (yd_d - ydot)
+
+      J = np.array([[np.cos(th) , -V_prev*np.sin(th)],
+                         [np.sin(th) , V_prev*np.cos(th)]])
+
+      u = np.array([u1, u2])
+
+      aw = linalg.solve(J, u)
+
+      a = aw[0]
+      om = aw[1]
 
 
+      # Integrate to obtain V
+      V = V_prev + a * dt
+
+      #reset V if it becomes 0 to avoid singularity
+      if(abs(V) < 0.01):
+        V = np.sqrt((xd_d - xdot)**2 + (yd_d - xdot)**2)
+
+      #Apply saturation limits
+      V = np.sign(V) * min(0.5, abs(V))
+      om = np.sin(om) * min(1.0, abs(om))
 
     ########## Code ends here ##########
 
